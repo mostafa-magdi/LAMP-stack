@@ -1,0 +1,48 @@
+- name: install httpd 
+  yum: 
+    name: httpd 
+    state: installed 
+
+- name: start and enable httpd 
+  systemd: 
+     name: httpd 
+     state: started 
+     enabled: yes 
+
+
+- name: Install MySQL
+  yum:
+     name: mariadb-server
+     state: present
+
+
+- name: Start and enable MySQL service
+  service:
+       name: mariadb
+       state: started
+       enabled: yes
+
+- name: install php
+  yum:
+    name:
+      - php
+    state: latest
+
+
+- name: permit traffic in default zone for https service 
+  firewalld: 
+     port: "{{ http_port }}" 
+     permanent: yes 
+     state: enabled 
+
+  notify: 
+    - reload service firewalld 
+
+- name: template render
+  template: 
+     src: index.php.j2
+     dest: "{{ page_dest }}"
+
+- name: Check that you can connect (GET) to a page and it returns a status 200
+  ansible.builtin.uri:
+    url: 
